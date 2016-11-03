@@ -40,7 +40,7 @@ class RtmEventHandler(object):
         # Filter out messages from the bot itself, and from non-users (eg. webhooks)
         if ('user' in event) and (not self.clients.is_message_from_me(event['user'])):
 
-            command = event['text']
+            command = event['text'].lower()
             channel = event['channel']
 
             if QUESTION in command:
