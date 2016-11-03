@@ -5,6 +5,7 @@ import re
 logger = logging.getLogger(__name__)
 
 QUESTION = 'is it'
+NEGATION = 'not'
 QUESTION_WHEN = ["when is", "how long", "how many days"]
 
 DIE_COMMAND = "no tears now, only dreams"
@@ -42,11 +43,22 @@ class RtmEventHandler(object):
 
             command = event['text'].lower()
             channel = event['channel']
+            negCount = 0
 
-            if QUESTION in command:
-                self.msg_writer.handleQuestion(command, channel)
+            for word in command.split():
+                if (NEGATION == word):
+                    negCount += 1
+
+            if QUESTION in command and "when is it" not in command:
+                self.msg_writer.handleQuestion(command, channel, negCount)
 
             else:
                 for when in QUESTION_WHEN:
                     if when in command:
-                        self.msg_writer.handleWhen(command, channel)
+                        self.msg_writer.handleWhen(command, channel, negCount)
+
+            #if DIE_COMMAND in command:
+                #Only enable when not hosted.
+            #    self.msg_writer.handleDeath(command, channel)
+
+    

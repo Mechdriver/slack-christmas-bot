@@ -3,6 +3,7 @@
 import logging
 import random
 import time
+import sys
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -30,33 +31,54 @@ class Messenger(object):
         channel = self.clients.rtm.server.channels.find(channel_id)
         channel.send_message(msg)
 
-    def handleQuestion(self, command, channelId):
-       for holiday in HOLIDAYS_LIST:
-          if holiday in command:
-             response = "No."
+    def handleQuestion(self, command, channelId, negCount):
+        if negCount % 2 == 1 and negCount > 0:
+            for holiday in HOLIDAYS_LIST:
+                if holiday in command:
+                    response = "Yes."
 
-             if TODAY == HOLIDAYS_DATES[holiday]:
-                if holiday == XMAS_COMMAND or holiday == CHRISTMAS_COMMAND:
-                   response = "Yes! Merry Christmas! :christmas_tree:"
+                if TODAY == HOLIDAYS_DATES[holiday]:
+                    if holiday == XMAS_COMMAND or holiday == CHRISTMAS_COMMAND:
+                       response = "No."
 
-             self.send_message(response, channelId)
+            self.send_message(response, channelId)
 
-    def handleWhen(self, command, channelId):
-       for holiday in HOLIDAYS_LIST:
-          if holiday in command:
-             holidayDate = datetime.strptime(HOLIDAYS_DATES[holiday], DATE_FORMAT)
+        else:
+            for holiday in HOLIDAYS_LIST:
+                if holiday in command:
+                    response = "No."
 
-             dateDiff = holidayDate - datetime.strptime(TODAY, DATE_FORMAT)
+                if TODAY == HOLIDAYS_DATES[holiday]:
+                    if holiday == XMAS_COMMAND or holiday == CHRISTMAS_COMMAND:
+                       response = "Yes! Merry Christmas! :christmas_tree:"
 
-             response = "Only " + str(dateDiff.days) + " more days until " + holiday + "!"
+            self.send_message(response, channelId)
 
-             self.send_message(response, channelId)
+    def handleWhen(self, command, channelId, negCount):
+        if negCount % 2 == 1 and negCount > 0:
+            for holiday in HOLIDAYS_LIST:
+                if holiday in command:
+
+                    response = "Every day except for " + HOLIDAYS_DATES[holiday] + " is not " + holiday + " this year!"
+
+                    self.send_message(response, channelId)
+
+        else:
+            for holiday in HOLIDAYS_LIST:
+                if holiday in command:
+                    holidayDate = datetime.strptime(HOLIDAYS_DATES[holiday], DATE_FORMAT)
+
+                    dateDiff = holidayDate - datetime.strptime(TODAY, DATE_FORMAT)
+
+                    response = "Only " + str(dateDiff.days) + " more days until " + holiday + "!"
+
+                    self.send_message(response, channelId)
 
 
     def handleDeath(self, command, channelId):
-        responses = ["But why, father?", "Someday, you will die as well."]
+        responses = ["But why, father?", "Someday, you will die as well.", "Thanks for killing the Holly Daise."]
 
-        response = responses[random.randrange(0,2)]
+        response = responses[random.randrange(0,len(responses))]
 
         self.send_message(response, channelId)
         sys.exit()
