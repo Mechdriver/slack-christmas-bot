@@ -17,7 +17,6 @@ HOLIDAYS_LIST = [CHRISTMAS_COMMAND, XMAS_COMMAND]
 HOLIDAYS_DATES = {CHRISTMAS_COMMAND: "12/25/2016", XMAS_COMMAND: "12/25/2016"}
 
 DATE_FORMAT = "%m/%d/%Y"
-TODAY = time.strftime(DATE_FORMAT)
 
 class Messenger(object):
     def __init__(self, slack_clients):
@@ -32,6 +31,8 @@ class Messenger(object):
         channel.send_message(msg)
 
     def handleQuestion(self, command, channelId, negCount):
+        TODAY = time.strftime(DATE_FORMAT)
+
         if negCount % 2 == 1 and negCount > 0:
             for holiday in HOLIDAYS_LIST:
                 if holiday in command:
@@ -55,6 +56,8 @@ class Messenger(object):
             self.send_message(response, channelId)
 
     def handleWhen(self, command, channelId, negCount):
+        TODAY = time.strftime(DATE_FORMAT)
+        
         if negCount % 2 == 1 and negCount > 0:
             for holiday in HOLIDAYS_LIST:
                 if holiday in command:
