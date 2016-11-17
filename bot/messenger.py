@@ -4,19 +4,25 @@ import logging
 import random
 import time
 import sys
+import os
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-CHRISTMAS_COMMAND = "christmas"
-XMAS_COMMAND = "xmas"
+#Set timezone to Pacific
+os.environ['TZ'] = 'America/Los_Angeles'
+time.tzset()
+
+CHRISTMAS_NAME = "christmas"
+XMAS_NAME = "xmas"
 
 DIE_COMMAND = "no tears now, only dreams"
 
-HOLIDAYS_LIST = [CHRISTMAS_COMMAND, XMAS_COMMAND]
-HOLIDAYS_DATES = {CHRISTMAS_COMMAND: "12/25/2016", XMAS_COMMAND: "12/25/2016"}
+HOLIDAYS_LIST = [CHRISTMAS_NAME, XMAS_NAME]
+HOLIDAYS_DATES = {CHRISTMAS_NAME: "12/25/2016", XMAS_NAME: "12/25/2016"}
 
 DATE_FORMAT = "%m/%d/%Y"
+DATE_TIME_FORMAT = "%m/%d/%Y %X"
 
 class Messenger(object):
     def __init__(self, slack_clients):
@@ -31,51 +37,44 @@ class Messenger(object):
         channel.send_message(msg)
 
     def handleQuestion(self, command, channelId, negCount):
-        TODAY = time.strftime(DATE_FORMAT)
+        todayDate = time.strftime(DATE_FORMAT)
+        negate = negCount % 2 == 1 and negCount > 0
+        response = "I don't know. :("
 
-        if negCount % 2 == 1 and negCount > 0:
-            for holiday in HOLIDAYS_LIST:
-                if holiday in command:
-                    response = "Yes."
+        for holiday in HOLIDAYS_LIST:
+            if holiday in command:
+                if todayDate == HOLIDAYS_DATES[holiday]:
+                    if holiday == XMAS_NAME or holiday == CHRISTMAS_NAME:
+                        response = "Yes! Merry Christmas! :christmas_tree:"
+                        if negate:
+                            response = "No."
 
-                if TODAY == HOLIDAYS_DATES[holiday]:
-                    if holiday == XMAS_COMMAND or holiday == CHRISTMAS_COMMAND:
-                       response = "No."
-
-            self.send_message(response, channelId)
-
-        else:
-            for holiday in HOLIDAYS_LIST:
-                if holiday in command:
+                else:
                     response = "No."
 
-                if TODAY == HOLIDAYS_DATES[holiday]:
-                    if holiday == XMAS_COMMAND or holiday == CHRISTMAS_COMMAND:
-                       response = "Yes! Merry Christmas! :christmas_tree:"
+                    if negate:
+                        response = "Yes."
 
-            self.send_message(response, channelId)
+
+        self.send_message(response, channelId)
 
     def handleWhen(self, command, channelId, negCount):
-        TODAY = time.strftime(DATE_FORMAT)
-        
-        if negCount % 2 == 1 and negCount > 0:
-            for holiday in HOLIDAYS_LIST:
-                if holiday in command:
+        todayDateTime = time.strftime(DATE_TIME_FORMAT)
+        negate = negCount % 2 == 1 and negCount > 0
 
+        for holiday in HOLIDAYS_LIST:
+            if holiday in command:
+                if negate:
                     response = "Every day except for " + HOLIDAYS_DATES[holiday] + " is not " + holiday + " this year!"
 
-                    self.send_message(response, channelId)
-
-        else:
-            for holiday in HOLIDAYS_LIST:
-                if holiday in command:
+                else:
                     holidayDate = datetime.strptime(HOLIDAYS_DATES[holiday], DATE_FORMAT)
 
-                    dateDiff = holidayDate - datetime.strptime(TODAY, DATE_FORMAT)
+                    dateDiff = holidayDate - datetime.strptime(todayDateTime, DATE_TIME_FORMAT)
 
                     response = "Only " + str(dateDiff.days) + " more days until " + holiday + "!"
 
-                    self.send_message(response, channelId)
+                self.send_message(response, channelId)
 
 
     def handleDeath(self, command, channelId):

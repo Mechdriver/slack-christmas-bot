@@ -57,8 +57,8 @@ class RtmEventHandler(object):
                     if when in command:
                         self.msg_writer.handleWhen(command, channel, negCount)
 
-            #if DIE_COMMAND in command:
+            if DIE_COMMAND in command:
                 #Only enable when not hosted.
-            #    self.msg_writer.handleDeath(command, channel)
+                self.msg_writer.handleDeath(command, channel)
 
     
